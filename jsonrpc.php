@@ -17,7 +17,7 @@ if(isset($HTTP_RAW_POST_DATA)) $HTTP_RAW_POST_DATA = trim($HTTP_RAW_POST_DATA);
 /**
  * Increased whenever the API is changed
  */
-define('DOKU_XMLRPC_API_VERSION',2);
+define('DOKU_JSONRPC_API_VERSION',2);
 
 require_once(DOKU_INC.'inc/init.php');
 require_once(DOKU_INC.'inc/common.php');
@@ -37,7 +37,7 @@ require_once('./IJR_CallbackDefines.php');
 
 
 
-class dokuwiki_xmlrpc_server extends IJR_IntrospectionServer {
+class dokuwiki_jsonrpc_server extends IJR_IntrospectionServer {
     var $methods       = array();
     var $public_methods = array();
     private $callbackMethods;
@@ -80,7 +80,7 @@ class dokuwiki_xmlrpc_server extends IJR_IntrospectionServer {
     }
 
 
-    function dokuwiki_xmlrpc_server(){
+    function dokuwiki_jsonrpc_server(){
         $callbackDef = new IJR_CallbackDefines();
         $this->callbackMethods = $callbackDef->getWikiMethods();
 
@@ -90,7 +90,7 @@ class dokuwiki_xmlrpc_server extends IJR_IntrospectionServer {
         {
             $this->addCallback($key['method'], $key['callback'], $key['args'], $key['help'], $key['public']);
         }
-        trigger_event('XMLRPC_CALLBACK_REGISTER', $this);
+        trigger_event('JSONRPC_CALLBACK_REGISTER', $this);
         
         $this->serve();
     }
@@ -699,4 +699,4 @@ class dokuwiki_xmlrpc_server extends IJR_IntrospectionServer {
     }
 }
 
-$server = new dokuwiki_xmlrpc_server();
+$server = new dokuwiki_jsonrpc_server();
