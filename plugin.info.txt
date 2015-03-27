@@ -1,0 +1,7 @@
+base   jsonrpc
+author Magnus Wolf
+email  mwolf2706@googlemail.com
+date   2010-12-13
+name   JSON-RPC interface
+desc   JSON-RPC interface to interact with dokuwiki from other Programms using Ajax Request
+url    http://www.dokuwiki.org/plugin:jsonrpc
