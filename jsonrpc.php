@@ -697,6 +697,43 @@ class dokuwiki_jsonrpc_server extends IJR_IntrospectionServer {
             return auth_login($user,$pass,false,true);
         }
     }
+
+    /**
+     * Copied from the register() function auth.php
+     */
+    public function createUser($login, $pass, $fullname, $email) {
+	global $lang;
+	global $conf;
+	/* @var DokuWiki_Auth_Plugin $auth */
+	global $auth;
+
+	// gather input
+	$login    = trim($auth->cleanUser($login));
+	$fullname = trim(preg_replace('/[\x00-\x1f:<>&%,;]+/', '', $fullname));
+	$email    = trim(preg_replace('/[\x00-\x1f:<>&%,;]+/', '', $email));
+	$pass     = $pass;
+
+	if(empty($login) || empty($fullname) || empty($email)) {
+            return new IJR_Error(-32602, 'Empty login / fullname / email');
+	}
+
+	//check mail
+	if(!mail_isvalid($email)) {
+	    return new IJR_Error(-32602, 'Invalid E-mail');
+	}
+
+	//okay try to create the user
+	if(!$auth->triggerUserMod('create', array($login, $pass, $fullname, $email))) {
+	    return new IJR_Error(-32099, 'Error creating user');
+	}
+
+	// send notification about the new user
+	$subscription = new Subscription();
+	$subscription->send_register($login, $fullname, $email);
+
+	// are we done?
+	return 1;
+    }
 }
 
 $server = new dokuwiki_jsonrpc_server();

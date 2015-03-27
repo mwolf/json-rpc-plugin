@@ -25,6 +25,13 @@ class IJR_CallbackDefines {
         $this->obj['help'] = 'Tries to login with the given credentials and sets auth cookies.';
         $this->methods[] = $this->obj;
 
+	/* Function to create user */
+	$this->obj['method'] = 'dokuwiki.createUser';
+        $this->obj['callback'] = 'this:createUser';
+        $this->obj['args'] = array('string','string','string','string');
+        $this->obj['help'] = 'Creates an user, based on the Username and password provided';
+        $this->methods[] = $this->obj;
+
         $this->obj['method'] = 'dokuwiki.getPagelist';
         $this->obj['callback'] = 'this:readNamespace';
         $this->obj['args'] = array('string','struct');
