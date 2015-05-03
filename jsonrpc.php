@@ -73,9 +73,12 @@ class dokuwiki_jsonrpc_server extends IJR_IntrospectionServer {
 
 
     function call($methodname, $args){
-        if(!in_array($methodname,$this->public_methods) && !$this->checkAuth()){
-            return new IJR_Error(-32603, 'server error. not authorized to call method "'.$methodname.'".');
-        }
+	if($methodname != "dokuwiki.login") {	// Allow the login function to pass through, since no session will exist at this point
+	    if(!in_array($methodname,$this->public_methods) && !$this->checkAuth()){
+		return new IJR_Error(-32603, 'server error. not authorized to call method "'.$methodname.'".');
+	    }
+	}
+
         return parent::call($methodname, $args);
     }
 
@@ -696,6 +699,45 @@ class dokuwiki_jsonrpc_server extends IJR_IntrospectionServer {
         {
             return auth_login($user,$pass,false,true);
         }
+    }
+
+    /**
+     * Helps create a new user remotely.
+     *
+     * Copied from the register() function auth.php
+     */
+    public function createUser($login, $pass, $fullname, $email) {
+	global $lang;
+	global $conf;
+	/* @var DokuWiki_Auth_Plugin $auth */
+	global $auth;
+
+	// gather input
+	$login    = trim($auth->cleanUser($login));
+	$fullname = trim(preg_replace('/[\x00-\x1f:<>&%,;]+/', '', $fullname));
+	$email    = trim(preg_replace('/[\x00-\x1f:<>&%,;]+/', '', $email));
+	$pass     = $pass;
+
+	if(empty($login) || empty($fullname) || empty($email)) {
+            return new IJR_Error(-32602, 'Empty login / fullname / email');
+	}
+
+	//check mail
+	if(!mail_isvalid($email)) {
+	    return new IJR_Error(-32602, 'Invalid E-mail');
+	}
+
+	//okay try to create the user
+	if(!$auth->triggerUserMod('create', array($login, $pass, $fullname, $email))) {
+	    return new IJR_Error(-32099, 'Error creating user');
+	}
+
+	// send notification about the new user
+	$subscription = new Subscription();
+	$subscription->send_register($login, $fullname, $email);
+
+	// are we done?
+	return 1;
     }
 }
 
